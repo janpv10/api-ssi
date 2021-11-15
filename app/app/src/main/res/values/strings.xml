@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">comunicacioWeb-App</string>
+    <string name="enviar">Enviar</string>
+    <string name="textview">TextView</string>
+    <string name="post">POST</string>
+    <string name="get">GET</string>
+</resources>
