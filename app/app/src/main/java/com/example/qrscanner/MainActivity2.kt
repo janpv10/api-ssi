@@ -1,4 +1,4 @@
-package com.example.comunicacioweb_app
+package com.example.qrscanner
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -19,53 +19,54 @@ import org.json.JSONObject
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
-import java.security.KeyStore
 import javax.net.ssl.HttpsURLConnection
 
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity2 : AppCompatActivity() {
 
     private lateinit var tvIsConnected: TextView
     private lateinit var etTitle: EditText
     private lateinit var tvResult: TextView
     private lateinit var post: RadioButton
     private lateinit var get: RadioButton
+    private lateinit var button: Button
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_main2)
 
         tvIsConnected = findViewById<TextView>(R.id.tvIsConnected)
         etTitle = findViewById<EditText>(R.id.etTitle)
         tvResult = findViewById<TextView>(R.id.tvResult)
         post = findViewById<RadioButton>(R.id.post)
         get = findViewById<RadioButton>(R.id.get)
+        button = findViewById(R.id.btnSend)
+
         checkNetworkConnection()
-        val button: Button = findViewById(R.id.btnSend)
-
-
-
-
-
 
         button.setOnClickListener {
-            var url = "https://api-prova-jan.netlify.app/.netlify/functions/api/post?param="
+            val url = intent.getStringExtra("key") + "/post?post="
             if (post.isChecked){
-                if (checkNetworkConnection())
+                if (checkNetworkConnection()){
+                    Toast.makeText(this, "Posted", Toast.LENGTH_SHORT).show()
                     lifecycleScope.launch {
-                        val result = httpPost(url)
+
+                        val result = httpPost(url+etTitle.text.toString())
 
                     }
+                }
                 else
                     Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show()
 
             }
             else {
-                val queue = Volley.newRequestQueue(this)
-                val url = "https://api-prova-jan.netlify.app/.netlify/functions/api"
 
+                Toast.makeText(this, "Get JSON", Toast.LENGTH_SHORT).show()
+
+                val queue = Volley.newRequestQueue(this)
+                val url = intent.getStringExtra("key")
                 // Request a string response from the provided URL.
                 val stringRequest = StringRequest(
                     Request.Method.GET, url,
@@ -81,26 +82,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
-
-
-
-    public fun send(title: String, url:String) {
-        Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show()
-        // clear text result
-        tvResult.setText("")
-
-        if (checkNetworkConnection())
-            lifecycleScope.launch {
-                val result = httpPost(url)
-
-            }
-        else
-            Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show()
-
-    }
-
     @Throws(IOException::class, JSONException::class)
     private suspend fun httpPost(myUrl: String): String {
 
@@ -112,7 +93,7 @@ class MainActivity : AppCompatActivity() {
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8")
 
             // 2. build JSON object
-            val jsonObject = buidJsonObject()
+            val jsonObject = buildJsonObject()
 
             // 3. add JSON content to POST request body
             setPostRequestContent(conn, jsonObject)
@@ -149,10 +130,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Throws(JSONException::class)
-    private fun buidJsonObject(): JSONObject {
+    private fun buildJsonObject(): JSONObject {
 
         val jsonObject = JSONObject()
-        jsonObject.accumulate("frase", etTitle.text.toString())
+        jsonObject.accumulate("post", etTitle.text.toString())
         print(jsonObject.toString())
         return jsonObject
     }

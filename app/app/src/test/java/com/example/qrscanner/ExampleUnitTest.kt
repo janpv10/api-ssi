@@ -1,4 +1,4 @@
-package com.example.comunicacioweb_app
+package com.example.qrscanner
 
 import org.junit.Test
 
