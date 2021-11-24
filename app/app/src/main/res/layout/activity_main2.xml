@@ -30,28 +30,6 @@
         app:layout_constraintTop_toBottomOf="@+id/tvIsConnected"
         android:autofillHints="" />
 
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="70dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etTitle">
-
-        <RadioButton
-            android:id="@+id/get"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/get" />
-
-        <RadioButton
-            android:id="@+id/post"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/post" />
-    </RadioGroup>
-
     <Button
         android:id="@+id/btnSend"
         android:layout_width="wrap_content"
@@ -60,7 +38,7 @@
         android:text="@string/send3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+        app:layout_constraintTop_toBottomOf="@+id/etTitle" />
 
     <TextView
         android:id="@+id/tvResult"

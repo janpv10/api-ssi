@@ -31,6 +31,7 @@ class MainActivity2 : AppCompatActivity() {
     private lateinit var post: RadioButton
     private lateinit var get: RadioButton
     private lateinit var button: Button
+    lateinit var myArray: Array<String>
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,45 +41,38 @@ class MainActivity2 : AppCompatActivity() {
         tvIsConnected = findViewById<TextView>(R.id.tvIsConnected)
         etTitle = findViewById<EditText>(R.id.etTitle)
         tvResult = findViewById<TextView>(R.id.tvResult)
-        post = findViewById<RadioButton>(R.id.post)
-        get = findViewById<RadioButton>(R.id.get)
         button = findViewById(R.id.btnSend)
 
         checkNetworkConnection()
 
+        val queue = Volley.newRequestQueue(this)
+        var url = intent.getStringExtra("key") + "/get"
+
+        // Request a string response from the provided URL.
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            { response ->
+                val str = response.toString()
+                Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
+                myArray = str.split('"').toTypedArray()
+                url = url.replace("/get", myArray[3])
+            },
+            { Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show()})
+
+        // Add the request to the RequestQueue.
+        queue.add(stringRequest)
+
         button.setOnClickListener {
-            val url = intent.getStringExtra("key") + "/post?post="
-            if (post.isChecked){
-                if (checkNetworkConnection()){
-                    Toast.makeText(this, "Posted", Toast.LENGTH_SHORT).show()
-                    lifecycleScope.launch {
+            if (checkNetworkConnection()){
+                Toast.makeText(this, "Posted", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    val myUrl = url + "?" + myArray[7] + "=" + etTitle.text.toString()
+                    val result = httpPost(myUrl)
 
-                        val result = httpPost(url+etTitle.text.toString())
-
-                    }
                 }
-                else
-                    Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show()
-
             }
-            else {
-
-                Toast.makeText(this, "Get JSON", Toast.LENGTH_SHORT).show()
-
-                val queue = Volley.newRequestQueue(this)
-                val url = intent.getStringExtra("key")
-                // Request a string response from the provided URL.
-                val stringRequest = StringRequest(
-                    Request.Method.GET, url,
-                    { response ->
-                        tvResult.text = "Response is: ${response.toString()}"
-                    },
-                    { tvResult.text = "That didn't work!" })
-
-                // Add the request to the RequestQueue.
-                queue.add(stringRequest)
-            }
-
+            else
+                Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show()
         }
     }
 
