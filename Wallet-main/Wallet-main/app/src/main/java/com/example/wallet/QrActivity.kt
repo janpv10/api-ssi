@@ -11,36 +11,67 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.budiyev.android.codescanner.CodeScanner
 import com.budiyev.android.codescanner.CodeScannerView
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 class QrActivity : AppCompatActivity() {
     private var mCodeScanner: CodeScanner? = null
-    var CameraPermission = false
-    val CAMERA_PERM = 1
+    private var cameraPermission = false
+    private val CAMERA_PERM = 1
+
+    private fun findSignature(jsonObject: JSONObject): String {
+        val str = intent.getStringExtra("key")
+        val jsonArray = JSONArray(str)
+        val x = jsonArray.length()
+        for (i in 0..x){
+            if (jsonArray.getJSONObject(i).get("name") == jsonObject.get("name") && jsonArray.getJSONObject(i).get("format") == jsonObject.get("format"))
+                return jsonArray.getJSONObject(i).get("signature").toString()
+        }
+        return "-1"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr)
         val scannerView: CodeScannerView = findViewById(R.id.scanner_view)
         mCodeScanner = CodeScanner(this, scannerView)
         askPermission()
-        if (CameraPermission) {
-            var resultText: String
+        if (cameraPermission) {
             scannerView.setOnClickListener { mCodeScanner!!.startPreview() }
             mCodeScanner!!.setDecodeCallback { result ->
 
                 runOnUiThread {
-                    Toast.makeText(
+                    /*Toast.makeText(
                         this@QrActivity,
                         result.getText(),
                         Toast.LENGTH_LONG
-                    ).show()
+                    ).show()*/
                 }
-                resultText = result.getText()
+                var url = result.getText() + "/get"
+                val queue = Volley.newRequestQueue(this)
 
-                val intent = Intent(this, HomeActivity::class.java)
-                startActivity(intent.putExtra("key", resultText))
+                // Request a string response from the provided URL.
+                val stringRequest = StringRequest(
+                    Request.Method.GET, url,
+                    { response ->
+                        val str = response.toString()
+                        //Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
+                        val jsonObject = JSONObject(str)
+                        url = url.replace("/get", jsonObject.get("url").toString()) + "?name=" + jsonObject.get("name").toString() + "&format=" + jsonObject.get("format").toString() + "&signature=" + findSignature(jsonObject)
+                        val intent = Intent(this, HomeActivity::class.java)
+                        startActivity(intent.putExtra("key", url))
+                    },
+                    { Toast.makeText(this, "Not Connected!", Toast.LENGTH_SHORT).show()})
+
+                // Add the request to the RequestQueue.
+                queue.add(stringRequest)
+
             }
         }
     }
@@ -59,7 +90,7 @@ class QrActivity : AppCompatActivity() {
                 )
             } else {
                 mCodeScanner!!.startPreview()
-                CameraPermission = true
+                cameraPermission = true
             }
         }
     }
@@ -70,9 +101,9 @@ class QrActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         if (requestCode == CAMERA_PERM) {
-            if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 mCodeScanner!!.startPreview()
-                CameraPermission = true
+                cameraPermission = true
             } else {
                 if (ActivityCompat.shouldShowRequestPermissionRationale(
                         this,
@@ -118,7 +149,7 @@ class QrActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        if (CameraPermission) {
+        if (cameraPermission) {
             mCodeScanner!!.releaseResources()
         }
         super.onPause()

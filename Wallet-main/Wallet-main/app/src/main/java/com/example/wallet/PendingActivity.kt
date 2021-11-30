@@ -12,8 +12,13 @@ class PendingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pending)
-        val btnback: FloatingActionButton = findViewById(R.id.btnhome2)
-        btnback.setOnClickListener {
+        val btn1: ImageButton = findViewById(R.id.btncred)
+        btn1.setOnClickListener {
+            val intent = Intent(this, CredentialsActivity::class.java)
+            startActivity(intent)
+        }
+        val btn2: ImageButton = findViewById(R.id.btnhome)
+        btn2.setOnClickListener {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
         }
