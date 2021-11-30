@@ -1,6 +1,6 @@
 function func(){
      
-     const theUrl = "https://api-prova-jan.netlify.app/.netlify/functions/api/comprovar-credencial"
+     const theUrl = "https://bet247.netlify.app/.netlify/functions/api/comprovar-credencial"
      var xhr = new XMLHttpRequest();
      xhr.open("GET", theUrl, true);
      xhr.onload = function (e) {
@@ -8,7 +8,7 @@ function func(){
                if (xhr.status === 200) {
                     var response = xhr.responseText
                     if(response == '{"boolean":"true"}'){
-                         document.location.href = "https://api-prova-jan.netlify.app/web.html";
+                         document.location.href = "https://bet247.netlify.app/home.html";
                     }
                     else{
                          window.alert("Permís denegat");
